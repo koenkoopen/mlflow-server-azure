@@ -1,20 +1,3 @@
-# Configure the Azure provider
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 3.9.0"
-    }
-  }
-  required_version = ">= 1.1.0"
-}
-
-# Provider for Azure
-provider "azurerm" {
-  features {}
-  subscription_id = var.subscription_id
-}
-
 resource "azurerm_resource_group" "default" {
   name     = var.resource_group_name
   location = var.location
@@ -48,7 +31,7 @@ resource "random_id" "always_trigger" {
 resource "null_resource" "docker_push" {
   provisioner "local-exec" {
     command = <<-EOT
-    docker build -f mlflow-tracking-docker/Dockerfile -t ${azurerm_container_registry.default.name}.azurecr.io/mlflowserver-azure .
+    docker build --platform linux/amd64 -f mlflow-tracking-docker/Dockerfile -t ${azurerm_container_registry.default.name}.azurecr.io/mlflowserver-azure .
     az acr login -n ${azurerm_container_registry.default.name}.azurecr.io/mlflowserver-azure --resource-group ${azurerm_resource_group.default.name}
     docker push ${azurerm_container_registry.default.name}.azurecr.io/mlflowserver-azure
   EOT
